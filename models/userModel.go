@@ -16,7 +16,8 @@ type AccountInfo struct {
 	Token            *string            `json:"token"`
 	User_type        *string            `json:"user_type" validate:"required,eq=admin|eq=registeredUser"`
 	User_id          string             `json:"user_id"`
-	Is_banned        *bool              `json:"is_banned"`
+	Is_banned        bool               `json:"is_banned" default:"false"`
+	Is_online        bool               `json:"is_online" default:"false"`
 }
 
 type ProfileInfo struct {

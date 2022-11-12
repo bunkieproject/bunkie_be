@@ -21,6 +21,7 @@ import (
 )
 
 var userCollection *mongo.Collection = database.OpenCollection(database.Client, "users")
+var onlineTokenCollection *mongo.Collection = database.OpenCollection(database.Client, "online_tokens")
 var validate = validator.New()
 
 // HashPassword hashes the password according to the bcrypt package
@@ -78,6 +79,7 @@ func Signup() gin.HandlerFunc {
 		if err != nil {
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the email"})
+			return
 		}
 
 		// Count the number of users with the same phone number
@@ -86,6 +88,7 @@ func Signup() gin.HandlerFunc {
 		if err != nil {
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the phone number"})
+			return
 		}
 
 		// Count the number of users with the same username
@@ -94,6 +97,7 @@ func Signup() gin.HandlerFunc {
 		if err != nil {
 			log.Panic(err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "error occured while checking for the username"})
+			return
 		}
 
 		// Give an error if the email, phone number, or the username are already in use
@@ -111,6 +115,8 @@ func Signup() gin.HandlerFunc {
 		user.User_id = user.ID.Hex()
 		token, _ := helper.GenerateToken(*user.Email, *user.First_name, *user.Last_name, *user.Username, *user.User_type, *&user.User_id)
 		user.Token = &token
+		user.Is_banned = false
+		user.Is_online = false
 
 		// Insert the user into the database
 		resultInsertionNumber, insertErr := userCollection.InsertOne(ctx, user)
@@ -130,6 +136,7 @@ func Login() gin.HandlerFunc {
 		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
 		var user models.AccountInfo
 		var foundUser models.AccountInfo
+		var ins_token models.Token
 
 		// Bind the request body to the user struct
 		if err := c.BindJSON(&user); err != nil {
@@ -156,6 +163,7 @@ func Login() gin.HandlerFunc {
 		// Check if the user exists in the database
 		if foundUser.Email == nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+			return
 		}
 
 		// Generate the token
@@ -167,6 +175,58 @@ func Login() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		ins_token.Token = &token
+		ins_token.User_id = &foundUser.User_id
+
+		resultInsertionNumber, err := onlineTokenCollection.InsertOne(ctx, ins_token)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		defer cancel()
+		fmt.Println(resultInsertionNumber)
+
+		err = userCollection.FindOneAndUpdate(ctx, bson.M{"user_id": foundUser.User_id}, bson.M{"$set": bson.M{"is_online": true}}).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		foundUser.Is_online = true
+
+		c.JSON(http.StatusOK, foundUser)
+	}
+}
+
+func Logout() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.AccountInfo
+		var foundUser models.AccountInfo
+
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		err = userCollection.FindOneAndUpdate(ctx, bson.M{"user_id": foundUser.User_id}, bson.M{"$set": bson.M{"is_online": false}}).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		err = onlineTokenCollection.FindOneAndDelete(ctx, bson.M{"user_id": foundUser.User_id}).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		foundUser.Is_online = false
+
 		c.JSON(http.StatusOK, foundUser)
 	}
 }
