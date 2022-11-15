@@ -231,6 +231,58 @@ func Logout() gin.HandlerFunc {
 	}
 }
 
+// Write a UpdateInfo function that uses gin-gonic to update the user's information
+func UpdateInfo() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.AccountInfo
+		var foundUser models.AccountInfo
+
+		// Bind the request body to the user struct
+		if err := c.BindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Find the user in the database
+		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Check if the user exists in the database
+		if foundUser.Email == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
+			return
+		}
+
+		// Update the user's information
+		update_map := bson.M{}
+		if user.First_name != nil {
+			update_map["first_name"] = user.First_name
+		}
+		if user.Last_name != nil {
+			update_map["last_name"] = user.Last_name
+		}
+		if user.Username != nil {
+			update_map["username"] = user.Username
+		}
+		if user.Phone != nil {
+			update_map["phone"] = user.Phone
+		}
+		update := bson.M{"$set": update_map}
+		err = userCollection.FindOneAndUpdate(ctx, bson.M{"email": user.Email}, update).Decode(&foundUser)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, foundUser)
+	}
+}
+
 func GetUser() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userId := c.Param("user_id")
