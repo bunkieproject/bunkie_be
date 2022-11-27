@@ -208,7 +208,7 @@ func Logout() gin.HandlerFunc {
 			return
 		}
 
-		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		err := userCollection.FindOne(ctx, bson.M{"user_id": user.User_id}).Decode(&foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -245,7 +245,7 @@ func UpdateInfo() gin.HandlerFunc {
 		}
 
 		// Find the user in the database
-		err := userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		err := userCollection.FindOne(ctx, bson.M{"user_id": user.User_id}).Decode(&foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -273,7 +273,7 @@ func UpdateInfo() gin.HandlerFunc {
 			update_map["phone"] = user.Phone
 		}
 		update := bson.M{"$set": update_map}
-		err = userCollection.FindOneAndUpdate(ctx, bson.M{"email": user.Email}, update).Decode(&foundUser)
+		err = userCollection.FindOneAndUpdate(ctx, bson.M{"user_id": user.User_id}, update).Decode(&foundUser)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -295,7 +295,7 @@ func DeleteUser() gin.HandlerFunc {
 			return
 		}
 
-		err = userCollection.FindOne(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		err = userCollection.FindOne(ctx, bson.M{"user_id": user.User_id}).Decode(&foundUser)
 		defer cancel()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -307,7 +307,7 @@ func DeleteUser() gin.HandlerFunc {
 			return
 		}
 
-		err = userCollection.FindOneAndDelete(ctx, bson.M{"email": user.Email}).Decode(&foundUser)
+		err = userCollection.FindOneAndDelete(ctx, bson.M{"user_id": user.User_id}).Decode(&foundUser)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
