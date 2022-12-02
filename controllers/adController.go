@@ -51,5 +51,50 @@ func CreateHouseAd() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+
+		c.JSON(http.StatusOK, houseAd)
+	}
+}
+
+func DeleteHouseAd() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var houseAd models.UpdatedHouseAd
+		var foundAd models.HouseAd
+
+		// Bind JSON to struct
+		if err := c.BindJSON(&houseAd); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		err := houseAdCollection.FindOne(ctx, bson.M{"user_id": houseAd.User_id}).Decode(&foundAd)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if houseAd.Header == nil {
+			houseAd.Header = foundAd.Header
+		}
+		if houseAd.Description == nil {
+			houseAd.Description = foundAd.Description
+		}
+
+		// Validate the input
+		validationErr := validate.Struct(houseAd)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		// Delete house ad from database
+		_, err = houseAdCollection.DeleteOne(ctx, bson.D{{Key: "user_id", Value: houseAd.User_id}})
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 }
