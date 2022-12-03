@@ -11,4 +11,5 @@ func AdRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("ads/delete", controller.DeleteHouseAd())
 	incomingRoutes.POST("ads/update", controller.UpdateHouseAd())
 	incomingRoutes.POST("ads/create_bunkie", controller.CreateBunkieAd())
+	incomingRoutes.POST("ads/delete_bunkie", controller.DeleteBunkieAd())
 }

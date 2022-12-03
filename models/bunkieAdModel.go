@@ -13,3 +13,15 @@ type BunkieAd struct {
 	Gender       *string            `json:"gender" validate:"required"`
 	Job          *string            `json:"job" validate:"required"`
 }
+
+type UpdatedBunkieAd struct {
+	ID           primitive.ObjectID `bson:"_id"`
+	User_id      *string            `bson:"user_id" validate:"required"`
+	City         *string            `json:"city"`
+	District     *string            `json:"district"`
+	Neighborhood *string            `json:"neighborhood"`
+	Size         *string            `json:"size"`
+	Price        *string            `json:"price"`
+	Gender       *string            `json:"gender"`
+	Job          *string            `json:"job"`
+}

@@ -226,3 +226,32 @@ func CreateBunkieAd() gin.HandlerFunc {
 
 	}
 }
+
+func DeleteBunkieAd() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var bunkieAd models.UpdatedBunkieAd
+
+		// Bind JSON to struct
+		if err := c.BindJSON(&bunkieAd); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Validate the input
+		validationErr := validate.Struct(bunkieAd)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		_, err := bunkieAdCollection.DeleteOne(ctx, bson.M{"user_id": bunkieAd.User_id})
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Bunkie ad deleted"})
+	}
+}
