@@ -255,3 +255,76 @@ func DeleteBunkieAd() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "Bunkie ad deleted"})
 	}
 }
+
+func UpdateBunkieAd() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var bunkieAd models.UpdatedBunkieAd
+		var foundAd models.BunkieAd
+
+		// Bind JSON to struct
+		if err := c.BindJSON(&bunkieAd); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Validate the input
+		validationErr := validate.Struct(bunkieAd)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		// Check if user has already created a bunkie ad
+		count_ads, err := bunkieAdCollection.CountDocuments(ctx, bson.M{"user_id": bunkieAd.User_id})
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if count_ads == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User does not have an ad"})
+			return
+		}
+
+		// Create update map
+		update_map := setUpdateMapBunkie(bunkieAd)
+
+		// Update bunkie ad in database
+		err = bunkieAdCollection.FindOneAndUpdate(ctx, bson.M{"user_id": bunkieAd.User_id}, bson.M{"$set": update_map}).Decode(&foundAd)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, foundAd)
+	}
+}
+
+func setUpdateMapBunkie(ad models.UpdatedBunkieAd) bson.M {
+	update_map := bson.M{}
+	if ad.City != nil {
+		update_map["city"] = ad.City
+	}
+	if ad.District != nil {
+		update_map["district"] = ad.District
+	}
+	if ad.Neighborhood != nil {
+		update_map["neighborhood"] = ad.Neighborhood
+	}
+	if ad.Size != nil {
+		update_map["size"] = ad.Size
+	}
+	if ad.Price != nil {
+		update_map["price"] = ad.Price
+	}
+	if ad.Gender != nil {
+		update_map["gender"] = ad.Gender
+	}
+	if ad.Job != nil {
+		update_map["job"] = ad.Job
+	}
+	return update_map
+}
