@@ -13,6 +13,7 @@ import (
 )
 
 var houseAdCollection *mongo.Collection = database.OpenCollection(database.Client, "houseAds")
+var bunkieAdCollection *mongo.Collection = database.OpenCollection(database.Client, "bunkieAds")
 
 func CreateHouseAd() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -180,4 +181,48 @@ func setUpdateMap(ad models.UpdatedHouseAd) bson.M {
 		update_map["house_photo"] = ad.House_photo
 	}
 	return update_map
+}
+
+func CreateBunkieAd() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, cancel = context.WithTimeout(context.Background(), 100*time.Second)
+		var bunkieAd models.BunkieAd
+
+		// Bind JSON to struct
+		if err := c.BindJSON(&bunkieAd); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Validate the input
+		validationErr := validate.Struct(bunkieAd)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		// Check if user has already created a bunkie ad
+		count_ads, err := bunkieAdCollection.CountDocuments(ctx, bson.M{"user_id": bunkieAd.User_id})
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if count_ads > 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User already has an ad"})
+			return
+		}
+
+		// Create bunkie ad in database
+		_, err = bunkieAdCollection.InsertOne(ctx, bunkieAd)
+		defer cancel()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, bunkieAd)
+
+	}
 }
