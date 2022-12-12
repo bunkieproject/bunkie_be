@@ -7,10 +7,12 @@ import (
 )
 
 func AdRoutes(incomingRoutes *gin.Engine) {
-	incomingRoutes.POST("ads/create", controller.CreateHouseAd())
-	incomingRoutes.POST("ads/delete", controller.DeleteHouseAd())
-	incomingRoutes.POST("ads/update", controller.UpdateHouseAd())
 	incomingRoutes.POST("ads/create_bunkie", controller.CreateBunkieAd())
-	incomingRoutes.POST("ads/delete_bunkie", controller.DeleteBunkieAd())
-	incomingRoutes.POST("ads/update_bunkie", controller.UpdateBunkieAd())
+	incomingRoutes.GET("ads/get_bunkie", controller.GetBunkieAd())
+	incomingRoutes.PUT("ads/update_bunkie", controller.UpdateBunkieAd())
+	incomingRoutes.DELETE("ads/delete_bunkie", controller.DeleteBunkieAd())
+	incomingRoutes.POST("ads/create_room_ad", controller.CreateRoomAd())
+	incomingRoutes.GET("ads/get_room_ad", controller.GetRoomAd())
+	incomingRoutes.PUT("ads/update_room_ad", controller.UpdateRoomAd())
+	incomingRoutes.DELETE("ads/delete_room_ad", controller.DeleteRoomAd())
 }

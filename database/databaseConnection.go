@@ -12,15 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func DBinstance() *mongo.Client {
+func DbInstance() *mongo.Client {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	MongoDb := os.Getenv("MONGODB_URL")
+	Mongodb := os.Getenv("MONGODB_URL")
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(MongoDb))
+	client, err := mongo.NewClient(options.Client().ApplyURI(Mongodb))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,7 +36,7 @@ func DBinstance() *mongo.Client {
 	return client
 }
 
-var Client *mongo.Client = DBinstance()
+var Client *mongo.Client = DbInstance()
 
 func OpenCollection(client *mongo.Client, collectionName string) *mongo.Collection {
 	var collection *mongo.Collection = client.Database("cluster0").Collection(collectionName)
