@@ -403,6 +403,9 @@ func EditProfileInfo() gin.HandlerFunc {
 		if request.ProfileInfo.Gender != nil {
 			user.ProfileInfo.Gender = request.ProfileInfo.Gender
 		}
+		if request.ProfileInfo.City != nil {
+			user.ProfileInfo.City = request.ProfileInfo.City
+		}
 
 		resultUpdateNumber, err := userCollection.UpdateOne(c, bson.M{"user_id": request.User_id}, bson.M{"$set": user})
 		if err != nil {

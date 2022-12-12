@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var bunkieAdCollection *mongo.Collection = database.OpenCollection(database.Client, "bunkie_ads")
@@ -453,4 +454,263 @@ func DeleteRoomAd() gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{"message": "Room ad deleted"})
 	}
+}
+
+func SearchBunkieAdDefault() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, _ = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.AccountInfo
+		var request models.SearchBunkieDefaultRequest
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if user.User_id != request.User_id {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User id does not match token"})
+			return
+		}
+
+		opts := options.Find().SetLimit(request.HowManyDocs)
+		opts.SetSort(bson.D{{"created_at", -1}})
+		filter := bson.M{"city": user.ProfileInfo.City}
+
+		cursor, err := bunkieAdCollection.Find(ctx, filter, opts)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var results []models.BunkieAd
+		for cursor.Next(ctx) {
+			var ad models.BunkieAd
+			cursor.Decode(&ad)
+			results = append(results, ad)
+		}
+
+		c.JSON(http.StatusOK, results)
+	}
+}
+
+func SearchBunkieAdPreferred() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, _ = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.AccountInfo
+		var request models.SearchBunkiePreferredRequest
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if user.User_id != request.User_id {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User id does not match token"})
+			return
+		}
+
+		opts := options.Find().SetLimit(request.HowManyDocs)
+		opts.SetSort(bson.D{{"created_at", -1}})
+
+		cursor, err := bunkieAdCollection.Find(ctx, opts)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var results []models.BunkieAd
+		for cursor.Next(ctx) {
+			var ad models.BunkieAd
+			cursor.Decode(&ad)
+			results = append(results, ad)
+		}
+
+		c.JSON(http.StatusOK, results)
+
+	}
+}
+
+func getAppropriateFilter(request models.SearchBunkiePreferredRequest) bson.M {
+	filter := bson.M{}
+
+	if request.LowerPrice != 0 {
+		filter["price"] = bson.M{"$gte": request.LowerPrice}
+	}
+	if request.UpperPrice != 0 {
+		filter["price"] = bson.M{"$lte": request.UpperPrice}
+	}
+	if request.GenderPreferred != nil {
+		filter["gender_preferred"] = *request.GenderPreferred
+	}
+	if request.NumberOfRooms != nil {
+		filter["number_of_rooms"] = *request.NumberOfRooms
+	}
+	if request.School != nil {
+		filter["school"] = *request.School
+	}
+	if request.City != nil {
+		filter["city"] = *request.City
+	}
+	if request.District != nil {
+		filter["district"] = *request.District
+	}
+	if request.Quarter != nil {
+		filter["quarter"] = *request.Quarter
+	}
+
+	return filter
+}
+
+func SearchRoomAdDefault() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, _ = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.AccountInfo
+		var request models.SearchRoomAdDefaultRequest
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if user.User_id != request.User_id {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User id does not match token"})
+			return
+		}
+
+		opts := options.Find().SetLimit(request.HowManyDocs)
+		opts.SetSort(bson.D{{"created_at", -1}})
+		filter := bson.M{"city": user.ProfileInfo.City}
+
+		cursor, err := roomAdCollection.Find(ctx, filter, opts)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var results []models.RoomAd
+		for cursor.Next(ctx) {
+			var ad models.RoomAd
+			cursor.Decode(&ad)
+			results = append(results, ad)
+		}
+
+		c.JSON(http.StatusOK, results)
+	}
+}
+
+func SearchRoomAdPreferred() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var ctx, _ = context.WithTimeout(context.Background(), 100*time.Second)
+		var user models.AccountInfo
+		var request models.SearchRoomAdPreferredRequest
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(ctx, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if user.User_id != request.User_id {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User id does not match token"})
+			return
+		}
+
+		opts := options.Find().SetLimit(request.HowManyDocs)
+		opts.SetSort(bson.D{{"created_at", -1}})
+		filter := getAppropriateFilterRoom(request)
+
+		cursor, err := roomAdCollection.Find(ctx, filter, opts)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var results []models.RoomAd
+		for cursor.Next(ctx) {
+			var ad models.RoomAd
+			cursor.Decode(&ad)
+			results = append(results, ad)
+		}
+
+		c.JSON(http.StatusOK, results)
+
+	}
+}
+
+func getAppropriateFilterRoom(request models.SearchRoomAdPreferredRequest) bson.M {
+	filter := bson.M{}
+
+	if request.LowerPrice != 0 {
+		filter["price"] = bson.M{"$gte": request.LowerPrice}
+	}
+	if request.UpperPrice != 0 {
+		filter["price"] = bson.M{"$lte": request.UpperPrice}
+	}
+	if request.GenderPreferred != nil {
+		filter["gender_preferred"] = *request.GenderPreferred
+	}
+	if request.NumberOfRooms != nil {
+		filter["number_of_rooms"] = *request.NumberOfRooms
+	}
+	if request.School != nil {
+		filter["school"] = *request.School
+	}
+	if request.City != nil {
+		filter["city"] = *request.City
+	}
+	if request.District != nil {
+		filter["district"] = *request.District
+	}
+	if request.Quarter != nil {
+		filter["quarter"] = *request.Quarter
+	}
+
+	return filter
 }
