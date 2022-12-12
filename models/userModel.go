@@ -26,4 +26,5 @@ type ProfileInfo struct {
 	ProfilePicture *string `json:"profile_picture"`
 	Description    *string `json:"description"`
 	Gender         *string `json:"gender"`
+	City           *string `json:"city"`
 }
