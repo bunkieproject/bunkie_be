@@ -129,3 +129,23 @@ type DeleteRoomAdRequest struct {
 	Ad_id   *string `json:"ad_id" validate:"required"`
 	User_id string  `json:"user_id" validate:"required"`
 }
+
+type SearchBunkieDefaultRequest struct {
+	Token       *string `json:"token" validate:"required"`
+	User_id     string  `json:"user_id" validate:"required"`
+	HowManyDocs int64   `json:"how_many_docs" validate:"required"`
+}
+
+type SearchBunkiePreferredRequest struct {
+	Token           *string `json:"token" validate:"required"`
+	User_id         string  `json:"user_id" validate:"required"`
+	HowManyDocs     int64   `json:"how_many_docs" validate:"required"`
+	LowerPrice      int64   `json:"lower_price"`
+	UpperPrice      int64   `json:"upper_price" `
+	NumberOfRooms   *string `json:"number_of_rooms"`
+	GenderPreferred *string `json:"gender_preferred"`
+	School          *string `json:"school"`
+	City            *string `json:"city"`
+	District        *string `json:"district"`
+	Quarter         *string `json:"quarter"`
+}
