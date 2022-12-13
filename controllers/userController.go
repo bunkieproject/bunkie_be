@@ -406,6 +406,12 @@ func EditProfileInfo() gin.HandlerFunc {
 		if request.ProfileInfo.City != nil {
 			user.ProfileInfo.City = request.ProfileInfo.City
 		}
+		if request.ProfileInfo.DisplayEmail != nil {
+			user.ProfileInfo.DisplayEmail = request.ProfileInfo.DisplayEmail
+		}
+		if request.ProfileInfo.DisplayPhone != nil {
+			user.ProfileInfo.DisplayPhone = request.ProfileInfo.DisplayPhone
+		}
 
 		resultUpdateNumber, err := userCollection.UpdateOne(c, bson.M{"user_id": request.User_id}, bson.M{"$set": user})
 		if err != nil {
@@ -416,4 +422,47 @@ func EditProfileInfo() gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"result": resultUpdateNumber})
 	}
 
+}
+
+func DisplayProfile() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.DisplayProfileRequest
+		var user models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var displayBanAndWarn bool
+		if *user.UserType == "admin" {
+			displayBanAndWarn = true
+		}
+
+		err = userCollection.FindOne(c, bson.M{"user_id": request.User_id}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
+		if !*user.ProfileInfo.DisplayEmail {
+			user.Email = nil
+		}
+		if !*user.ProfileInfo.DisplayPhone {
+			user.ProfileInfo.Phone = nil
+		}
+		c.JSON(http.StatusOK, gin.H{"user": user, "displayBanAndWarn": displayBanAndWarn})
+	}
 }

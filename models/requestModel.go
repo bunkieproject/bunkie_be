@@ -169,3 +169,8 @@ type SearchRoomAdPreferredRequest struct {
 	District        *string `json:"district"`
 	Quarter         *string `json:"quarter"`
 }
+
+type DisplayProfileRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}

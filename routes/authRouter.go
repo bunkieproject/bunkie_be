@@ -15,4 +15,5 @@ func AuthRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.PUT("users/settings", controller.UpdateAccountInfo())
 	incomingRoutes.POST("users/create_profile", controller.CreateProfileInfo())
 	incomingRoutes.PUT("users/edit_profile", controller.EditProfileInfo())
+	incomingRoutes.GET("users/display_profile", controller.DisplayProfile())
 }
