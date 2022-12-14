@@ -17,6 +17,16 @@ type LogoutRequest struct {
 	User_id string  `json:"user_id" validate:"required"`
 }
 
+type ResetPasswordRequest struct {
+	Email string `json:"email" validate:"required"`
+}
+
+type EnterNewPasswordRequest struct {
+	Email              string  `json:"email" validate:"required"`
+	NewPassword        *string `json:"new_password" validate:"required,min=6,max=32"`
+	NewPasswordConfirm *string `json:"new_password_confirm" validate:"eqfield=NewPassword"`
+}
+
 type DeleteAccountRequest struct {
 	Token   *string `json:"token" validate:"required"`
 	User_id string  `json:"user_id" validate:"required"`
@@ -168,4 +178,24 @@ type SearchRoomAdPreferredRequest struct {
 	City            *string `json:"city"`
 	District        *string `json:"district"`
 	Quarter         *string `json:"quarter"`
+}
+
+type DisplayProfileRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
+type BanUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
+type WarnUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
+type UnbanUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
 }
