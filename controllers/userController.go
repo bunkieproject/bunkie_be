@@ -4,7 +4,10 @@ import (
 	"bunkie_be/database"
 	helper "bunkie_be/helpers"
 	"bunkie_be/models"
+	"log"
+	"math/rand"
 	"net/http"
+	"net/smtp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -178,6 +181,99 @@ func Logout() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"result": resultDeleteNumber})
+	}
+}
+
+func ResetPassword() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.ResetPasswordRequest
+		var user models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"email": request.Email}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
+		// generate new password
+		verificationCode := GenerateSixDigit()
+
+		// send this 6 digit verficiation code to user's email
+		err = SendCodeToEmail(request.Email, verificationCode)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"verification_code": verificationCode})
+	}
+}
+
+func GenerateSixDigit() string {
+	rand.Seed(time.Now().UnixNano())
+	digits := "0123456789"
+	b := make([]byte, 6)
+	for i := range b {
+		b[i] = digits[rand.Intn(len(digits))]
+	}
+	return string(b)
+}
+
+func SendCodeToEmail(email string, code string) error {
+	from := "projectbunkie@gmail.com"
+	to := email
+	password := "oosegoowejpoywqd"
+	msg := "From: " + from + " \n" + "To: " + to + " \n" + "Subject: Verification Code \n\n" + "Your verification code is: " + code
+	err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, password, "smtp.gmail.com"), from, []string{to}, []byte(msg))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return err
+}
+
+func EnterNewPassword() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.EnterNewPasswordRequest
+		var user models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"email": request.Email}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
+		password, _ := HashPassword(*request.NewPassword)
+		err = userCollection.FindOneAndUpdate(c, bson.M{"email": request.Email}, bson.M{"$set": bson.M{"password_hash": password}}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "Password updated successfully"})
+
 	}
 }
 
