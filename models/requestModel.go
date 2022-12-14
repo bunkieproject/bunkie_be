@@ -184,3 +184,18 @@ type DisplayProfileRequest struct {
 	Token   *string `json:"token" validate:"required"`
 	User_id string  `json:"user_id" validate:"required"`
 }
+
+type BanUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
+type WarnUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
+type UnbanUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}

@@ -20,6 +20,8 @@ import (
 
 var userCollection *mongo.Collection = database.OpenCollection(database.Client, "users")
 var onlineCollection *mongo.Collection = database.OpenCollection(database.Client, "online")
+var bannedUsersCollection *mongo.Collection = database.OpenCollection(database.Client, "banned_users")
+var warnedUsersCollection *mongo.Collection = database.OpenCollection(database.Client, "warned_users")
 var validate = validator.New()
 
 // HashPassword hashes the password using bcrypt
@@ -130,6 +132,68 @@ func Login() gin.HandlerFunc {
 		isPassValid, err := VerifyPassword(*user.PasswordHash, *request.Password)
 		if !isPassValid {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+
+		err = bannedUsersCollection.FindOne(c, bson.M{"user_id": user.User_id}).Decode(&user)
+		if err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "You are banned"})
+			return
+		}
+
+		err = warnedUsersCollection.FindOne(c, bson.M{"user_id": user.User_id}).Decode(&user)
+		if err == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "You are warned"})
+			return
+		}
+
+		onlineToken.Token = user.Token
+		onlineToken.User_id = user.User_id
+
+		_, err = onlineCollection.InsertOne(c, onlineToken)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"token": onlineToken.Token})
+	}
+}
+
+func AdminLogin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.LoginRequest
+		var user models.AccountInfo
+		var onlineToken models.Token
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"username": request.UsernameOrEmail}).Decode(&user)
+		if err != nil { // if username not found, try email
+			err = userCollection.FindOne(c, bson.M{"email": request.UsernameOrEmail}).Decode(&user)
+			if err != nil { // if email not found, return error
+				c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+				return
+			}
+		}
+
+		isPassValid, err := VerifyPassword(*user.PasswordHash, *request.Password)
+		if !isPassValid {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err})
+			return
+		}
+
+		if *user.UserType != "admin" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "You are not admin"})
 			return
 		}
 
@@ -560,5 +624,134 @@ func DisplayProfile() gin.HandlerFunc {
 			user.ProfileInfo.Phone = nil
 		}
 		c.JSON(http.StatusOK, gin.H{"user": user, "displayBanAndWarn": displayBanAndWarn})
+	}
+}
+
+func BanUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.BanUserRequest
+		var user models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if *user.UserType != "admin" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not admin"})
+			return
+		}
+
+		err = userCollection.FindOne(c, bson.M{"user_id": request.User_id}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
+		_, err = bannedUsersCollection.InsertOne(c, bson.M{"user_id": request.User_id})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"result": "User banned"})
+	}
+}
+
+func WarnUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.WarnUserRequest
+		var user models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if *user.UserType != "admin" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not admin"})
+			return
+		}
+
+		err = userCollection.FindOne(c, bson.M{"user_id": request.User_id}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
+		_, err = warnedUsersCollection.InsertOne(c, bson.M{"user_id": request.User_id})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"result": "User warned"})
+	}
+}
+
+func UnbanUser() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.UnbanUserRequest
+		var user models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if *user.UserType != "admin" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not admin"})
+			return
+		}
+
+		err = userCollection.FindOne(c, bson.M{"user_id": request.User_id}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
+			return
+		}
+
+		_, err = bannedUsersCollection.DeleteOne(c, bson.M{"user_id": request.User_id})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"result": "User unbaned"})
 	}
 }
