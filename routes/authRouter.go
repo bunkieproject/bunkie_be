@@ -18,4 +18,8 @@ func AuthRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("users/create_profile", controller.CreateProfileInfo())
 	incomingRoutes.PUT("users/edit_profile", controller.EditProfileInfo())
 	incomingRoutes.GET("users/display_profile", controller.DisplayProfile())
+	incomingRoutes.POST("users/admin/ban_user", controller.BanUser())
+	incomingRoutes.POST("users/admin/unban_user", controller.UnbanUser())
+	incomingRoutes.POST("users/admin/warn_user", controller.WarnUser())
+	incomingRoutes.POST("users/admin/login", controller.AdminLogin())
 }
