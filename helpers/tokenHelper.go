@@ -1,9 +1,9 @@
 package helper
 
 import (
-	"bunkie_be/database"
 	"context"
 	"fmt"
+	"github.com/bunkieproject/bunkie_be/database"
 	"log"
 	"os"
 	"time"
