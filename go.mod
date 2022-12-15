@@ -1,4 +1,4 @@
-module bunkie_be
+module github.com/bunkieproject/bunkie_be
 
 go 1.19
 

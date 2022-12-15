@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"bunkie_be/database"
-	"bunkie_be/models"
 	"context"
 	"net/http"
 	"time"
+
+	"github.com/bunkieproject/bunkie_be/database"
+	"github.com/bunkieproject/bunkie_be/models"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
