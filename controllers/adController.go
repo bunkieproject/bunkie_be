@@ -28,6 +28,10 @@ func CreateBunkieAd() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(ad)
 		if validationErr != nil {
@@ -91,6 +95,10 @@ func GetBunkieAd() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -117,6 +125,10 @@ func UpdateBunkieAd() gin.HandlerFunc {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
 			return
 		}
 
@@ -195,6 +207,10 @@ func DeleteBunkieAd() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -232,6 +248,10 @@ func CreateRoomAd() gin.HandlerFunc {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
 			return
 		}
 
@@ -299,6 +319,10 @@ func GetRoomAd() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -325,6 +349,10 @@ func UpdateRoomAd() gin.HandlerFunc {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
 			return
 		}
 
@@ -417,6 +445,10 @@ func DeleteRoomAd() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -466,6 +498,10 @@ func SearchBunkieAdDefault() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -513,6 +549,10 @@ func SearchBunkieAdPreferred() gin.HandlerFunc {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
 			return
 		}
 
@@ -595,6 +635,10 @@ func SearchRoomAdDefault() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -642,6 +686,10 @@ func SearchRoomAdPreferred() gin.HandlerFunc {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
 			return
 		}
 

@@ -495,6 +495,10 @@ func UpdateAccountInfo() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -548,6 +552,10 @@ func CreateProfileInfo() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -593,6 +601,10 @@ func EditProfileInfo() gin.HandlerFunc {
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
 			return
 		}
 
@@ -664,6 +676,10 @@ func DisplayProfile() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if !checkIfUserOnline(request.User_id, c) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not online"})
+			return
+		}
 
 		validationErr := validate.Struct(request)
 		if validationErr != nil {
@@ -729,6 +745,15 @@ func BanUser() gin.HandlerFunc {
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "User not found"})
 			return
+		}
+
+		err = onlineCollection.FindOne(c, bson.M{"user_id": request.User_id}).Decode(&user)
+		if err == nil {
+			_, err = onlineCollection.DeleteOne(c, bson.M{"user_id": request.User_id})
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
 		}
 
 		_, err = bannedUsersCollection.InsertOne(c, bson.M{"user_id": request.User_id})
@@ -825,4 +850,14 @@ func UnbanUser() gin.HandlerFunc {
 
 		c.JSON(http.StatusOK, gin.H{"result": "User unbaned"})
 	}
+}
+
+func checkIfUserOnline(user_id string, c *gin.Context) bool {
+	var user models.AccountInfo
+
+	err := onlineCollection.FindOne(c, bson.M{"user_id": user_id}).Decode(&user)
+	if err != nil {
+		return false
+	}
+	return true
 }
