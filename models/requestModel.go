@@ -199,3 +199,8 @@ type UnbanUserRequest struct {
 	Token   *string `json:"token" validate:"required"`
 	User_id string  `json:"user_id" validate:"required"`
 }
+
+type DeleteUserRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
