@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"bunkie_be/database"
-	helper "bunkie_be/helpers"
-	"bunkie_be/models"
+	"github.com/bunkieproject/bunkie_be/database"
+	helper "github.com/bunkieproject/bunkie_be/helpers"
+	"github.com/bunkieproject/bunkie_be/models"
 	"log"
 	"math/rand"
 	"net/http"
