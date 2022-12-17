@@ -1,7 +1,7 @@
 package routes
 
 import (
-	controller "bunkie_be/controllers"
+	controller "github.com/bunkieproject/bunkie_be/controllers"
 
 	"github.com/gin-gonic/gin"
 )

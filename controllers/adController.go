@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	"bunkie_be/database"
-	"bunkie_be/models"
 	"context"
+	"github.com/bunkieproject/bunkie_be/database"
+	"github.com/bunkieproject/bunkie_be/models"
 	"net/http"
 	"time"
 
