@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	routes "bunkie_be/routes"
+	routes "github.com/bunkieproject/bunkie_be/routes"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"

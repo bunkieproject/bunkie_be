@@ -204,3 +204,7 @@ type DeleteUserRequest struct {
 	Token   *string `json:"token" validate:"required"`
 	User_id string  `json:"user_id" validate:"required"`
 }
+
+type GetUserListRequest struct {
+	Token *string `json:"token" validate:"required"`
+}
