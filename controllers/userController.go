@@ -295,9 +295,9 @@ func GenerateSixDigit() string {
 }
 
 func SendCodeToEmail(email string, code string) error {
-	from := "projectbunkie@gmail.com"
+	from := os.Getenv("GOOGLE_EMAIL")
 	to := email
-	password := "oosegoowejpoywqd"
+	password := os.Getenv("GOOGLE_PASSWORD")
 	msg := "From: " + from + " \n" + "To: " + to + " \n" + "Subject: Verification Code \n\n" + "Your verification code is: " + code
 	err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, password, "smtp.gmail.com"), from, []string{to}, []byte(msg))
 	if err != nil {
