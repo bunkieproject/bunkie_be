@@ -4,7 +4,6 @@ import (
 	routes "github.com/bunkieproject/bunkie_be/routes"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
