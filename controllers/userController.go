@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/smtp"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -295,9 +296,9 @@ func GenerateSixDigit() string {
 }
 
 func SendCodeToEmail(email string, code string) error {
-	from := "projectbunkie@gmail.com"
+	from := os.Getenv("GOOGLE_EMAIL")
 	to := email
-	password := "oosegoowejpoywqd"
+	password := os.Getenv("GOOGLE_PASSWORD")
 	msg := "From: " + from + " \n" + "To: " + to + " \n" + "Subject: Verification Code \n\n" + "Your verification code is: " + code
 	err := smtp.SendMail("smtp.gmail.com:587", smtp.PlainAuth("", from, password, "smtp.gmail.com"), from, []string{to}, []byte(msg))
 	if err != nil {
@@ -860,4 +861,48 @@ func checkIfUserOnline(user_id string, c *gin.Context) bool {
 		return false
 	}
 	return true
+}
+
+func GetUserList() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var request models.GetUserListRequest
+		var user models.AccountInfo
+		var users []models.AccountInfo
+
+		if err := c.BindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		validationErr := validate.Struct(request)
+		if validationErr != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
+			return
+		}
+
+		err := userCollection.FindOne(c, bson.M{"token": request.Token}).Decode(&user)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if *user.UserType != "admin" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not admin"})
+			return
+		}
+
+		cursor, err := userCollection.Find(c, bson.M{})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		for cursor.Next(c) {
+			var user models.AccountInfo
+			cursor.Decode(&user)
+			users = append(users, user)
+		}
+
+		c.JSON(http.StatusOK, gin.H{"result": users})
+	}
 }
