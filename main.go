@@ -1,9 +1,6 @@
 package main
 
 import (
-	"log"
-	"os"
-
 	routes "github.com/bunkieproject/bunkie_be/routes"
 
 	"github.com/gin-gonic/gin"
