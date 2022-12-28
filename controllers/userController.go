@@ -16,6 +16,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -157,7 +158,7 @@ func Login() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"token": onlineToken.Token})
+		c.JSON(http.StatusOK, gin.H{"token": onlineToken.Token, "user_id": onlineToken.User_id})
 	}
 }
 
@@ -672,6 +673,8 @@ func DisplayProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var request models.DisplayProfileRequest
 		var user models.AccountInfo
+		var room_ads []models.RoomAd
+		var bunkie_ads []models.BunkieAd
 
 		if err := c.BindJSON(&request); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -705,13 +708,49 @@ func DisplayProfile() gin.HandlerFunc {
 			return
 		}
 
-		if !*user.ProfileInfo.DisplayEmail {
-			user.Email = nil
+		opts := options.Find()
+		filter := bson.M{"user_id": request.User_id}
+		cur, err := roomAdCollection.Find(c, filter, opts)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
 		}
-		if !*user.ProfileInfo.DisplayPhone {
-			user.ProfileInfo.Phone = nil
+
+		var room_ad models.RoomAd
+		for cur.Next(c) {
+			err := cur.Decode(&room_ad)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			room_ads = append(room_ads, room_ad)
 		}
-		c.JSON(http.StatusOK, gin.H{"user": user, "displayBanAndWarn": displayBanAndWarn})
+
+		cur_bun, err := bunkieAdCollection.Find(c, filter, opts)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		var bunkie_ad models.BunkieAd
+		for cur_bun.Next(c) {
+			err := cur_bun.Decode(&bunkie_ad)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			bunkie_ads = append(bunkie_ads, bunkie_ad)
+		}
+
+		if user.ProfileInfo != nil {
+			if !*user.ProfileInfo.DisplayEmail {
+				user.Email = nil
+			}
+			if !*user.ProfileInfo.DisplayPhone {
+				user.ProfileInfo.Phone = nil
+			}
+		}
+		c.JSON(http.StatusOK, gin.H{"user": user, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
 	}
 }
 
