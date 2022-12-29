@@ -13,7 +13,7 @@ import (
 	"github.com/bunkieproject/bunkie_be/controllers"
 )
 
-type Request struct {
+type RequestSignup struct {
 	Username         string `json:"username"`
 	Email            string `json:"email"`
 	Password         string `json:"password"`
@@ -21,9 +21,9 @@ type Request struct {
 }
 
 type SignupInput struct {
-	Request      Request `json:"request"`
-	Testname     string  `json:"testname"`
-	ResponseCode int     `json:"response_code"`
+	Request      RequestSignup `json:"request"`
+	Testname     string        `json:"testname"`
+	ResponseCode int           `json:"response_code"`
 }
 
 func TestSignUp(t *testing.T) {
@@ -34,7 +34,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Correct signup",
 			ResponseCode: http.StatusOK,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser",
 				Email:            "testuser@gmail.com",
 				Password:         "testuser",
@@ -44,7 +44,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Short username",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "tes",
 				Email:            "testuser1@gmail.com",
 				Password:         "testuser1",
@@ -54,7 +54,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Long username",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testtesttesttesttesttesttesttesttesttest",
 				Email:            "testuser2@gmail.com",
 				Password:         "testuser2",
@@ -64,7 +64,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "No username",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Email:            "testuser3@gmail.com",
 				Password:         "testuser3",
 				Password_confirm: "testuser3",
@@ -73,7 +73,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "No email",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser4",
 				Password:         "testuser4",
 				Password_confirm: "testuser4",
@@ -82,7 +82,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Short password",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 
 				Username:         "testuser5",
 				Email:            "testuser5@gmail.com",
@@ -93,7 +93,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Long password",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser6",
 				Email:            "testuser6@gmail.com",
 				Password:         "testtesttesttesttesttesttesttesttesttest",
@@ -103,7 +103,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "No password",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser7",
 				Email:            "testuser7@gmail.com",
 				Password_confirm: "testuser7",
@@ -112,7 +112,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "No password confirm",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username: "testuser8",
 				Email:    "testuser8@gmail.com",
 				Password: "testuser8",
@@ -121,7 +121,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Password and password confirm don't match",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser9",
 				Email:            "testuser9@gmail.com",
 				Password:         "testuser9",
@@ -131,7 +131,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Email already exists",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser10",
 				Email:            "testuser10@gmail.com",
 				Password:         "testuser10",
@@ -141,7 +141,7 @@ func TestSignUp(t *testing.T) {
 		SignupInput{
 			Testname:     "Username already exists",
 			ResponseCode: http.StatusBadRequest,
-			Request: Request{
+			Request: RequestSignup{
 				Username:         "testuser11",
 				Email:            "testuser11@gmail.com",
 				Password:         "testuser11",
