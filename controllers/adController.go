@@ -531,7 +531,12 @@ func SearchBunkieAdDefault() gin.HandlerFunc {
 
 		opts := options.Find().SetLimit(request.HowManyDocs)
 		opts.SetSort(bson.D{{"created_at", -1}})
-		filter := bson.M{"city": user.ProfileInfo.City}
+		var filter bson.M
+		if user.ProfileInfo.City == nil {
+			filter = bson.M{"city": "İstanbul"}
+		} else {
+			filter = bson.M{"city": user.ProfileInfo.City}
+		}
 
 		cursor, err := bunkieAdCollection.Find(ctx, filter, opts)
 		if err != nil {
@@ -668,7 +673,12 @@ func SearchRoomAdDefault() gin.HandlerFunc {
 
 		opts := options.Find().SetLimit(request.HowManyDocs)
 		opts.SetSort(bson.D{{"created_at", -1}})
-		filter := bson.M{"city": user.ProfileInfo.City}
+		var filter bson.M
+		if user.ProfileInfo.City == nil {
+			filter = bson.M{"city": "İstanbul"}
+		} else {
+			filter = bson.M{"city": user.ProfileInfo.City}
+		}
 
 		cursor, err := roomAdCollection.Find(ctx, filter, opts)
 		if err != nil {
