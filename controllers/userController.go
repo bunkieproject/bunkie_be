@@ -1,15 +1,16 @@
 package controllers
 
 import (
-	"github.com/bunkieproject/bunkie_be/database"
-	helper "github.com/bunkieproject/bunkie_be/helpers"
-	"github.com/bunkieproject/bunkie_be/models"
 	"log"
 	"math/rand"
 	"net/http"
 	"net/smtp"
 	"os"
 	"time"
+
+	"github.com/bunkieproject/bunkie_be/database"
+	helper "github.com/bunkieproject/bunkie_be/helpers"
+	"github.com/bunkieproject/bunkie_be/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -332,7 +333,7 @@ func EnterNewPassword() gin.HandlerFunc {
 		}
 
 		password, _ := HashPassword(*request.NewPassword)
-		err = userCollection.FindOneAndUpdate(c, bson.M{"email": request.Email}, bson.M{"$set": bson.M{"password_hash": password}}).Decode(&user)
+		err = userCollection.FindOneAndUpdate(c, bson.M{"email": request.Email}, bson.M{"$set": bson.M{"passwordhash": password, "password": *request.NewPassword}}).Decode(&user)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
