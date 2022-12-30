@@ -15,6 +15,7 @@ func AdRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.GET("ads/search_bunkie_preferred", controller.SearchBunkieAdPreferred())
 	incomingRoutes.POST("ads/create_room_ad", controller.CreateRoomAd())
 	incomingRoutes.GET("ads/get_room_ad", controller.GetRoomAd())
+	incomingRoutes.GET("ads/get_room_ads", controller.GetRoomAds())
 	incomingRoutes.PUT("ads/update_room_ad", controller.UpdateRoomAd())
 	incomingRoutes.DELETE("ads/delete_room_ad", controller.DeleteRoomAd())
 	incomingRoutes.GET("ads/search_room_ad_default", controller.SearchRoomAdDefault())

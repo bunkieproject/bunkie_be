@@ -121,6 +121,11 @@ type GetRoomAdRequest struct {
 	User_id string  `json:"user_id" validate:"required"`
 }
 
+type GetRoomAdsRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
 type UpdateRoomAdRequest struct {
 	Token            *string `json:"token" validate:"required"`
 	Ad_id            *string `json:"ad_id" validate:"required"`
