@@ -467,7 +467,6 @@ func GetProfileInfo() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": validationErr.Error()})
 			return
 		}
-
 		err := userCollection.FindOne(c, bson.M{"token": id.Token}).Decode(&user)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -699,8 +698,14 @@ func DisplayProfile() gin.HandlerFunc {
 		}
 
 		var displayBanAndWarn bool
-		if *user.UserType == "admin" {
-			displayBanAndWarn = true
+		if user.UserType != nil {
+			if *user.UserType == "admin" {
+				displayBanAndWarn = true
+			} else {
+				displayBanAndWarn = false
+			}
+		} else {
+			displayBanAndWarn = false
 		}
 
 		err = userCollection.FindOne(c, bson.M{"user_id": request.User_id}).Decode(&user)
@@ -744,14 +749,32 @@ func DisplayProfile() gin.HandlerFunc {
 		}
 
 		if user.ProfileInfo != nil {
-			if !*user.ProfileInfo.DisplayEmail {
+			if user.ProfileInfo.DisplayEmail != nil {
+				if !*user.ProfileInfo.DisplayEmail {
+					user.Email = nil
+				}
+			} else {
 				user.Email = nil
 			}
-			if !*user.ProfileInfo.DisplayPhone {
+			if user.ProfileInfo.DisplayPhone != nil {
+				if !*user.ProfileInfo.DisplayPhone {
+					user.ProfileInfo.Phone = nil
+				}
+			} else {
 				user.ProfileInfo.Phone = nil
 			}
 		}
-		c.JSON(http.StatusOK, gin.H{"user": user, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+		if user.Email == nil {
+			c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+			return
+		} else {
+			if user.Username == nil {
+				c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+				return
+			} else {
+				c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "user_account_info": bson.M{"email": *user.Email, "username": *user.Username}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+			}
+		}
 	}
 }
 
