@@ -22,6 +22,6 @@ func AuthRoutes(incomingRoutes *gin.Engine) {
 	incomingRoutes.POST("users/admin/unban_user", controller.UnbanUser())
 	incomingRoutes.POST("users/admin/warn_user", controller.WarnUser())
 	incomingRoutes.POST("users/admin/login", controller.AdminLogin())
-	incomingRoutes.POST("users/admin/delete_user", controller.DeleteUser())
+	incomingRoutes.DELETE("users/admin/delete_user", controller.DeleteUser())
 	incomingRoutes.GET("users/admin/get_users", controller.GetUserList())
 }
