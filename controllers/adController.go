@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"context"
-	"github.com/bunkieproject/bunkie_be/database"
-	"github.com/bunkieproject/bunkie_be/models"
 	"net/http"
 	"time"
+
+	"github.com/bunkieproject/bunkie_be/database"
+	"github.com/bunkieproject/bunkie_be/models"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -64,6 +65,7 @@ func CreateBunkieAd() gin.HandlerFunc {
 		ad = models.BunkieAd{
 			Ad_id:           primitive.NewObjectID().Hex(),
 			User_id:         request.User_id,
+			School:          request.School,
 			City:            request.City,
 			District:        request.District,
 			Quarter:         request.Quarter,
@@ -170,6 +172,9 @@ func UpdateBunkieAd() gin.HandlerFunc {
 func getValidUpdatesB(request models.UpdateBunkieRequest) bson.M {
 	update := bson.M{"$set": bson.M{}}
 
+	if request.School != nil {
+		update["$set"].(bson.M)["school"] = request.School
+	}
 	if request.City != nil {
 		update["$set"].(bson.M)["city"] = request.City
 	}
@@ -288,6 +293,7 @@ func CreateRoomAd() gin.HandlerFunc {
 			User_id:          request.User_id,
 			Header_bytearray: request.Header_bytearray,
 			Other_bytearrays: request.Other_bytearrays,
+			School:           request.School,
 			City:             request.City,
 			District:         request.District,
 			Quarter:          request.Quarter,
@@ -404,6 +410,9 @@ func getValidUpdatesR(request models.UpdateRoomAdRequest) bson.M {
 	}
 	if request.Other_bytearrays != nil {
 		update["$set"].(bson.M)["other_bytearrays"] = request.Other_bytearrays
+	}
+	if request.School != nil {
+		update["$set"].(bson.M)["school"] = request.School
 	}
 	if request.City != nil {
 		update["$set"].(bson.M)["city"] = request.City
