@@ -619,8 +619,9 @@ func SearchBunkieAdPreferred() gin.HandlerFunc {
 
 		opts := options.Find().SetLimit(request.HowManyDocs)
 		opts.SetSort(bson.D{{"created_at", -1}})
+		filter := getAppropriateFilter(request)
 
-		cursor, err := bunkieAdCollection.Find(ctx, opts)
+		cursor, err := bunkieAdCollection.Find(ctx, filter, opts)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
