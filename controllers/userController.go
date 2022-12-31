@@ -795,8 +795,8 @@ func DisplayProfile() gin.HandlerFunc {
 				return
 			}
 
-			var room_ad models.RoomAd
 			for cur.Next(c) {
+				var room_ad models.RoomAd
 				err := cur.Decode(&room_ad)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -811,8 +811,8 @@ func DisplayProfile() gin.HandlerFunc {
 				return
 			}
 
-			var bunkie_ad models.BunkieAd
 			for cur_bun.Next(c) {
+				var bunkie_ad models.BunkieAd
 				err := cur_bun.Decode(&bunkie_ad)
 				if err != nil {
 					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -820,7 +820,6 @@ func DisplayProfile() gin.HandlerFunc {
 				}
 				bunkie_ads = append(bunkie_ads, bunkie_ad)
 			}
-
 			c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "user_account_info": bson.M{"email": *user.Email, "username": *user.Username}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
 
 		}
