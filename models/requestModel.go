@@ -61,6 +61,7 @@ type EditProfileInfoRequest struct {
 type CreateBunkieRequest struct {
 	Token           *string `json:"token" validate:"required"`
 	User_id         string  `json:"user_id" validate:"required"`
+	School          *string `json:"school" validate:"required"`
 	City            *string `json:"city" validate:"required"`
 	District        *string `json:"district" validate:"required"`
 	Quarter         *string `json:"quarter" validate:"required"`
@@ -81,6 +82,7 @@ type UpdateBunkieRequest struct {
 	Token           *string `json:"token" validate:"required"`
 	Ad_id           *string `json:"ad_id" validate:"required"`
 	User_id         string  `json:"user_id" validate:"required"`
+	School          *string `json:"school"`
 	City            *string `json:"city"`
 	District        *string `json:"district"`
 	Quarter         *string `json:"quarter"`
@@ -104,6 +106,7 @@ type CreateRoomAdRequest struct {
 	Other_bytearrays *string `json:"other_bytearrays"`
 	Header           *string `json:"header" validate:"required"`
 	Description      *string `json:"description" validate:"required"`
+	School           *string `json:"school" validate:"required"`
 	City             *string `json:"city" validate:"required"`
 	District         *string `json:"district" validate:"required"`
 	Quarter          *string `json:"quarter" validate:"required"`
@@ -118,6 +121,11 @@ type GetRoomAdRequest struct {
 	User_id string  `json:"user_id" validate:"required"`
 }
 
+type GetRoomAdsRequest struct {
+	Token   *string `json:"token" validate:"required"`
+	User_id string  `json:"user_id" validate:"required"`
+}
+
 type UpdateRoomAdRequest struct {
 	Token            *string `json:"token" validate:"required"`
 	Ad_id            *string `json:"ad_id" validate:"required"`
@@ -126,6 +134,7 @@ type UpdateRoomAdRequest struct {
 	Other_bytearrays *string `json:"other_bytearrays"`
 	Header           *string `json:"header"`
 	Description      *string `json:"description"`
+	School           *string `json:"school"`
 	City             *string `json:"city"`
 	District         *string `json:"district"`
 	Quarter          *string `json:"quarter"`

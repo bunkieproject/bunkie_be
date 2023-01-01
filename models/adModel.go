@@ -7,6 +7,7 @@ import (
 type BunkieAd struct {
 	Ad_id           string    `json:"ad_id"`
 	User_id         string    `json:"user_id"`
+	School          *string   `json:"school"`
 	City            *string   `json:"city"`
 	District        *string   `json:"district"`
 	Quarter         *string   `json:"quarter"`
@@ -25,6 +26,7 @@ type RoomAd struct {
 	Other_bytearrays *string   `json:"other_bytearrays"`
 	Header           *string   `json:"header"`
 	Description      *string   `json:"description"`
+	School           *string   `json:"school"`
 	City             *string   `json:"city"`
 	District         *string   `json:"district"`
 	Quarter          *string   `json:"quarter"`

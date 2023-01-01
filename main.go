@@ -1,25 +1,18 @@
 package main
 
 import (
-	"log"
 	"os"
 
 	routes "github.com/bunkieproject/bunkie_be/routes"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	port := os.Getenv("PORT")
 
 	if port == "" {
-		port = "8000"
+		port = "8080"
 	}
 
 	router := gin.New()
