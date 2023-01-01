@@ -30,8 +30,13 @@ func DeleteUser() gin.HandlerFunc {
 			return
 		}
 
-		if *user.UserType != "admin" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "You are not admin"})
+		if user.UserType != nil {
+			if *user.UserType != "admin" {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "User is not an admin"})
+				return
+			}
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "User is not an admin"})
 			return
 		}
 
