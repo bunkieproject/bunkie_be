@@ -61,6 +61,7 @@ func SignUp() gin.HandlerFunc {
 			return
 		}
 		user.Token = &token
+		user.ProfileInfo = &models.ProfileInfo{}
 
 		resultInsertNumber, err := userCollection.InsertOne(c, user)
 		if err != nil {
