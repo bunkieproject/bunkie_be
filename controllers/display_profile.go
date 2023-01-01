@@ -108,18 +108,18 @@ func DisplayProfile() gin.HandlerFunc {
 
 			if user.Email == nil {
 				if user.ProfileInfo.Phone == nil {
-					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "user_account_info": bson.M{"email": nil, "phone_number": nil}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "username": user.Username, "user_account_info": bson.M{"email": nil, "phone_number": nil}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
 					return
 				} else {
-					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "user_account_info": bson.M{"email": nil, "phone_number": *user.ProfileInfo.Phone}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "username": user.Username, "user_account_info": bson.M{"email": nil, "phone_number": *user.ProfileInfo.Phone}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
 					return
 				}
 			} else {
 				if user.ProfileInfo.Phone == nil {
-					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "user_account_info": bson.M{"email": *user.Email, "phone_number": nil}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "username": user.Username, "user_account_info": bson.M{"email": *user.Email, "phone_number": nil}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
 					return
 				} else {
-					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "user_account_info": bson.M{"email": *user.Email, "phone_number": *user.ProfileInfo.Phone}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
+					c.JSON(http.StatusOK, gin.H{"user_profile_info": user.ProfileInfo, "username": user.Username, "user_account_info": bson.M{"email": *user.Email, "phone_number": *user.ProfileInfo.Phone}, "displayBanAndWarn": displayBanAndWarn, "room_ads": room_ads, "bunkie_ads": bunkie_ads})
 					return
 				}
 			}
